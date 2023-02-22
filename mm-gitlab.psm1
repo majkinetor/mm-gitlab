@@ -29,11 +29,13 @@ function Get-GitLabProjectId([string] $Namespace) {
     Add-Type -AssemblyName System.Web
     $encoded_namespace = [System.Web.HttpUtility]::UrlEncode($Namespace)
 
-    $project_uri = [uri]"$GitlabApiUrl/projects/$encoded_namespace"
-    if ($PSVersionTable.PSVersion -le 5) {  fixuri $project_uri }
+    $project_uri = "projects/$encoded_namespace"
+    if ($PSVersionTable.PSVersion -le 5) { fixuri $project_uri }
 
-    $irm.Uri = $project_uri
-    $project = Invoke-RestMethod @irm
+    $params = @{
+        Endpoint = $project_uri
+    }
+    $project = send-request $params
     if (!$project) { throw "Can't find project: $Namespace" }
     $project.id
 }
