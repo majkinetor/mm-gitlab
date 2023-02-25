@@ -13,13 +13,3 @@ Use `$VerbosePreference = 'Continue'` on the top of the script or `-Verbose` opt
 ## Prerequisites
 
 Nothing particular is required. Works with PowerShell 3+.
-
-## Examples
-
-### Login
-
-```ps1
-# Login to redmine using your key: My account -> API access key
-# Must have Administration -> Settings -> API -> [x] Enable REST web service
-Initialize-GitLabSession -Url 'https://redmine...' -Key '<key>'
-```
