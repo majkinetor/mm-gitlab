@@ -3,7 +3,7 @@ $VerbosePreference = 'Continue'
 Import-Module $PSScriptRoot\mm-gitlab.psm1 -Force
 
 $token = Get-Content $PSScriptRoot\gltoken
-Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token 'w28xRnY3yvRed46YgsLF'
+Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token $token
 
 $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/top'
 
