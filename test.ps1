@@ -29,7 +29,7 @@ $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/top'
     Remove-GitlabMilestone
 #>
 
-<# Labels
+<# ====== Labels
     Get-GitLabLabel | ft
     New-GitlabLabel -Name test -Color red -Description test
     Remove-GitlabLabel -LabelId test
