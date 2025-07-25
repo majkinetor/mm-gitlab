@@ -5,7 +5,7 @@ Import-Module $PSScriptRoot\mm-gitlab.psm1 -Force
 $token = Get-Content $PSScriptRoot\gltoken
 Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token $token
 
-$GL_ProjectId = Get-GitLabProjectId 'jafin-ng/top'
+$GL_ProjectId = Get-GitLabProjectId 'jafin-ng/jafin'
 
 <# ====== Issues
     $f = New-GitLabIssueFilter -Labels 'service-rest', 'meta-trivial'
@@ -34,3 +34,10 @@ $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/top'
     New-GitlabLabel -Name test -Color red -Description test
     Remove-GitlabLabel -LabelId test
 #>
+
+$labels = Get-Content C:\Work\_\nil\jafin2k\jafin\scripts\gitlab\project\labels.txt
+foreach ($label in $labels) {
+    $p = @{}
+    $p.name, $p.color, $p.description = $label -split '\s+',3
+    try { New-GitlabLabel @p  | Format-Table name, description } catch {}
+}

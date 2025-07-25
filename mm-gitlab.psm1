@@ -1,4 +1,4 @@
-# v0.02
+# v0.03
 
 function Initialize-GitLabSession {
     param(
@@ -42,9 +42,10 @@ function New-GitlabLabel {
 
     $query = ""
     $query += if ($Name) { "&name=" +  [uri]::EscapeDataString( $Name ) }
-    $query += if ($Description) { "&description=$Description" }
-    $query += if ($Color) { "&color=$Color" }
+    $query += if ($Description) { "&description=" + [uri]::EscapeDataString( $Description ) }
+    $query += if ($Color) { "&color=" + [uri]::EscapeDataString( $Color ) }
     $query += if ($Priority) { "&priority=$Priority" }
+    $query = $query.Substring(1)
 
     $params = @{
         Method = 'Post'
@@ -189,6 +190,32 @@ function New-GitLabMilestone {
     $params = @{
         Method = 'Post'
         Endpoint =  "projects/$ProjectId/milestones?$query"
+    }
+    Send-Request $params
+}
+
+#https://docs.gitlab.com/api/issues/#edit-an-issue
+function Set-GitLabIssue {
+    param(
+        [int]      $ProjectId = $GL_ProjectId,
+        [int]      $IssueId,
+
+        [int]      $MilestoneId = $GL_MilestoneId,
+        [string]   $Title,
+        [string]   $Description,
+        [datetime] $DueDate
+    )
+
+    $query = ''
+    $query += if ($MilestoneId) { "&milestone_id=$MilestoneId" }
+    $query += if ($Title) { '&title=' + [uri]::EscapeDataString( $Title ) }
+    $query += if ($Description) { "&description=$Description" }
+    $query += if ($DueDate) {"&due_date=" + $DueDate.ToString('s') }
+    $query = $query.Substring(1)
+
+    $params = @{
+        Method = 'Put'
+        Endpoint = "projects/$ProjectId/issues/${IssueId}?${query}"
     }
     Send-Request $params
 }
