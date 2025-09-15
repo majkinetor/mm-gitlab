@@ -8,6 +8,21 @@ function Initialize-GitLabSession {
     $script:GitLab = @{ Url = $Url; Token = $Token }
 }
 
+# https://docs.gitlab.com/api/project_markdown_uploads
+function Send-GitLabFile {
+    param(
+        [int] $ProjectId = $GL_ProjectId,
+        [string] $FilePath
+    )
+    $fileInfo = Get-Item $FilePath -ErrorAction Stop
+    $params = @{
+        Method = "Post"
+        Endpoint = "projects/$ProjectId/uploads"
+        Form = @{ file = $fileInfo }
+    }
+    Send-Request $params
+}
+
 # https://docs.gitlab.com/ee/api/labels.html
 function Get-GitLabLabel {
     param(
@@ -120,7 +135,7 @@ function Get-GitLabIssue {
         [ref] $Count,
         [ref] $TotalPages,
         [PSCustomObject] $Filter,
-        [int[]] $IId,
+        [int[]] $IssueId,
 
         [ValidateSet('asc', 'desc')]
         [string] $Sort = 'asc',
@@ -131,7 +146,7 @@ function Get-GitLabIssue {
         [switch] $With_Labels_Details
     )
 
-    if ($Iid) { $Filter = New-GitLabIssueFilter -IId $IId }
+    if ($IssueId) { $Filter = New-GitLabIssueFilter -IId $IssueId }
 
     $query = "page=${Page}&per_page=${PerPage}&scope=all&sort=${Sort}&state=${State}"
     $query += if ($With_Labels_Details) { "&with_labels_details=$With_Labels_Details" }
@@ -370,6 +385,6 @@ function send-request( [HashTable] $Params ) {
     $p.Headers."PRIVATE-TOKEN" = $GitLab.Token
     $p.Remove('EndPoint')
 
-    ($p | ConvertTo-Json -Depth 100).Replace('\"', '"').Replace('\r\n', '') | Write-Verbose
+    ($p | ConvertTo-Json).Replace('\"', '"').Replace('\r\n', '') | Write-Verbose
     Invoke-RestMethod @p
 }

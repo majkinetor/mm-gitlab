@@ -7,7 +7,11 @@ Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token $token
 
 $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/jafin'
 
-<# ====== Issues
+<#
+# === Issues
+    $issueId = 123
+    $issue = Get-GitLabIssue -IssueId $issueId
+
     $f = New-GitLabIssueFilter -Labels 'service-rest', 'meta-trivial'
     $f = New-GitLabIssueFilter -Milestone 'NEXT'
     $f = New-GitLabIssueFilter -Assignee_Username 'mmilic'
@@ -17,9 +21,12 @@ $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/jafin'
     $all_issues = Get-AllPages -Action "Get-GitLabIssue" @{ Filter = $f } -ShowProgress
     $all_issues.Count
     $all_issues | Format-Table
-#>
 
-<# ====== Milestones
+    $file = Send-GitLabFile -FilePath $PSScriptRoot\test.ps1
+    $description = $issue.description + "`n" + $file.markdown
+    Set-GitlabIssue -IssueId $issueId -Description $description
+
+# === Milestones
     Get-GitlabMilestone -Iid 1,86 | ft
     Get-GitlabMilestone -Title NEXT | ft
 
@@ -27,17 +34,22 @@ $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/jafin'
     $GL_MilestoneId = $m.id
     Set-GitlabMilestone -State close
     Remove-GitlabMilestone
-#>
 
-<# ====== Labels
+# === Labels
     Get-GitLabLabel | ft
     New-GitlabLabel -Name test -Color red -Description test
     Remove-GitlabLabel -LabelId test
-#>
 
-$labels = Get-Content C:\Work\_\nil\jafin2k\jafin\scripts\gitlab\project\labels.txt
-foreach ($label in $labels) {
-    $p = @{}
-    $p.name, $p.color, $p.description = $label -split '\s+',3
-    try { New-GitlabLabel @p  | Format-Table name, description } catch {}
-}
+# Add labels from file containing lines: label_name #color description:
+#   priority-low       #CC0033 Low priority task
+#   priority-immediate #CC0033 This task needs maximum attention immediately. Stop everything else until this is done.
+#   priority-hi        #CC0033 High priority task
+
+ $labels = Get-Content labels.txt
+ foreach ($label in $labels) {
+     $p = @{}
+     $p.name, $p.color, $p.description = $label -split '\s+',3
+     try { New-GitlabLabel @p  | Format-Table name, description } catch {}
+ }
+
+#>
