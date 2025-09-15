@@ -1,4 +1,4 @@
-# v0.03
+# v0.031
 
 function Initialize-GitLabSession {
     param(
@@ -120,6 +120,7 @@ function Get-GitLabIssue {
         [ref] $Count,
         [ref] $TotalPages,
         [PSCustomObject] $Filter,
+        [int[]] $IId,
 
         [ValidateSet('asc', 'desc')]
         [string] $Sort = 'asc',
@@ -130,6 +131,8 @@ function Get-GitLabIssue {
         [switch] $With_Labels_Details
     )
 
+    if ($Iid) { $Filter = New-GitLabIssueFilter -IId $IId }
+
     $query = "page=${Page}&per_page=${PerPage}&scope=all&sort=${Sort}&state=${State}"
     $query += if ($With_Labels_Details) { "&with_labels_details=$With_Labels_Details" }
     $query += if ($Filter) { "&$($Filter.Query)" }
@@ -137,9 +140,10 @@ function Get-GitLabIssue {
         Endpoint = "projects/$ProjectId/issues?$query"
         ResponseHeadersVariable = 'script:_'
     }
-    Send-Request $params
+    $res = Send-Request $params
     if ($Count) { $Count.Value = [int] "$($script:_.'x-total')" }
     if ($TotalPages) { $TotalPages.Value = [int] "$($script:_.'x-total-pages')" }
+    return $Iid.Count -eq 1 ? $res[0] : $res
 }
 
 #https://docs.gitlab.com/ee/api/milestones.html#list-project-milestones
@@ -321,6 +325,7 @@ function Get-AllPages {
     $all_data
 }
 
+# Get GitLab project Id from the Namespace
 function Get-GitLabProjectId([string] $Namespace) {
     function fixuri($uri){
         $UnEscapeDotsAndSlashes = 0x2000000
