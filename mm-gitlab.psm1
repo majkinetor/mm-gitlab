@@ -1,4 +1,4 @@
-# v0.031
+# v0.4
 
 function Initialize-GitLabSession {
     param(
