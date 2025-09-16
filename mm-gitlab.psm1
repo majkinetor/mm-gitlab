@@ -1,17 +1,29 @@
-# v0.4
+# v0.5
 
-function Initialize-GitLabSession {
+# https://docs.gitlab.com/api/notes/#create-new-issue-note
+function New-GitLabIssueNote {
     param(
-        [string] $Url,
-        [string] $Token
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $IssueId,
+        [string] $Body
     )
-    $script:GitLab = @{ Url = $Url; Token = $Token }
+
+    $query = ''
+    $query += if ($Body) { '&body=' + [uri]::EscapeDataString( $Body ) }
+    $query = if ($query) { $query.Substring(1) }
+
+    $params = @{
+        Method = "Post"
+        Endpoint = "projects/$ProjectId/issues/$IssueId/notes?$query"
+    }
+    Send-Request $params
 }
 
 # https://docs.gitlab.com/api/project_markdown_uploads
 function Send-GitLabFile {
+    [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         [string] $FilePath
     )
     $fileInfo = Get-Item $FilePath -ErrorAction Stop
@@ -25,8 +37,9 @@ function Send-GitLabFile {
 
 # https://docs.gitlab.com/ee/api/labels.html
 function Get-GitLabLabel {
+    [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         [int] $Page = 1,
         [int] $PerPage = 100,
         [ref] $Count,
@@ -47,8 +60,9 @@ function Get-GitLabLabel {
 
 # https://docs.gitlab.com/ee/api/labels.html#create-a-new-label
 function New-GitlabLabel {
+    [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         [string] $Name,
         [string] $Description,
         [string] $Color = 'white',
@@ -72,8 +86,9 @@ function New-GitlabLabel {
 
 # https://docs.gitlab.com/ee/api/labels.html#delete-a-label
 function Remove-GitlabLabel {
+    [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         # ID or title of label
         [string] $LabelId
     )
@@ -125,11 +140,40 @@ function New-GitLabIssueFilter {
     [PSCustomObject]$res
 }
 
+# https://docs.gitlab.com/api/issues/#new-issue
+function New-GitLabIssue {
+    [CmdletBinding()]
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $MilestoneId = $script:GitLab.MilestoneId,
+        [int] $AssigneeId,
+        [string]   $Title,
+        [string]   $Description,
+        [datetime] $DueDate,
+        [string[]] $Labels
+    )
+
+    $query = ''
+    $query += if ($AssigneId) { "&assignee_id=$AssigneeId" }
+    $query += if ($MilestoneId) { "&milestone_id=$MilestoneId" }
+    $query += if ($Title) { '&title=' + [uri]::EscapeDataString( $Title ) }
+    $query += if ($Description) {'&description=' + [uri]::EscapeDataString( $Description )}
+    $query += if ($DueDate) {"&due_date=" + $DueDate.ToString('s') }
+    $query += if ($Labels) { "&labels=" + ($Labels -join ',') }
+    $query = $query.Substring(1)
+
+    $params = @{
+        Method = 'Post'
+        Endpoint = "projects/$ProjectId/issues?$query"
+    }
+    Send-Request $params
+}
+
 # https://docs.gitlab.com/ee/api/issues.html
 function Get-GitLabIssue {
     [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         [int] $Page = 1,
         [int] $PerPage = 100,
         [ref] $Count,
@@ -161,10 +205,22 @@ function Get-GitLabIssue {
     return $Iid.Count -eq 1 ? $res[0] : $res
 }
 
+function Set-GitlabMilestoneId {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        # Case sensitive full milestone title
+        [string] $Title,
+        [int] $Iid
+    )
+
+    $res = Get-GitLabMilestone -ProjectId $ProjectId -Title $Title -IId $Iid
+    $script:GitLab.MilestoneId = $res[0].id
+}
+
 #https://docs.gitlab.com/ee/api/milestones.html#list-project-milestones
 function Get-GitlabMilestone {
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         # Case sensitive full milestone title
         [string] $Title,
         [int[]] $Iid,
@@ -194,7 +250,7 @@ function Get-GitlabMilestone {
 function New-GitLabMilestone {
     [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
         [string] $Title,
         [string] $Description,
         [datetime] $StartDate,
@@ -202,7 +258,7 @@ function New-GitLabMilestone {
     )
 
     $query = 'title=' + [uri]::EscapeDataString( $Title )
-    $query += if ($Description) { "&description=$Description" }
+    $query += if ($Description) { '&description=' + [uri]::EscapeDataString( $Description )}
     $query += if ($StartDate) {"&start_date=" + $StartDate.ToString('s') }
     $query += if ($DueDate) {"&due_date=" + $DueDate.ToString('s') }
 
@@ -216,19 +272,20 @@ function New-GitLabMilestone {
 #https://docs.gitlab.com/api/issues/#edit-an-issue
 function Set-GitLabIssue {
     param(
-        [int]      $ProjectId = $GL_ProjectId,
+        [int]      $ProjectId = $script:GitLab.ProjectId,
         [int]      $IssueId,
 
-        [int]      $MilestoneId = $GL_MilestoneId,
+        [int]      $MilestoneId = $script:GitLab.MilestoneId,
         [string]   $Title,
         [string]   $Description,
-        [datetime] $DueDate
+        [datetime] $DueDate,
+        [string[]] $Labels
     )
 
     $query = ''
     $query += if ($MilestoneId) { "&milestone_id=$MilestoneId" }
     $query += if ($Title) { '&title=' + [uri]::EscapeDataString( $Title ) }
-    $query += if ($Description) { "&description=$Description" }
+    $query += if ($Description) { '&description=' + [uri]::EscapeDataString( $Description ) }
     $query += if ($DueDate) {"&due_date=" + $DueDate.ToString('s') }
     $query = $query.Substring(1)
 
@@ -241,9 +298,10 @@ function Set-GitLabIssue {
 
 #https://docs.gitlab.com/ee/api/milestones.html#edit-milestone
 function Set-GitlabMilestone {
+    [CmdletBinding()]
     param(
-        [int]      $ProjectId = $GL_ProjectId,
-        [int]      $MilestoneId = $GL_MilestoneId,
+        [int]      $ProjectId = $script:GitLab.ProjectId,
+        [int]      $MilestoneId = $script:GitLab.MilestoneId,
         [string]   $Title,
         [string]   $Description,
         [datetime] $StartDate,
@@ -254,7 +312,7 @@ function Set-GitlabMilestone {
 
     $query = ''
     $query += if ($Title) { '&title=' + [uri]::EscapeDataString( $Title ) }
-    $query += if ($Description) { "&description=$Description" }
+    $query += if ($Description) { '&description=' + [uri]::EscapeDataString( $Description ) }
     $query += if ($StartDate) {"&start_date=" + $StartDate.ToString('s') }
     $query += if ($DueDate) {"&due_date=" + $DueDate.ToString('s') }
     $query += if ($StateEvent) {"&state_event=$StateEvent"}
@@ -269,9 +327,10 @@ function Set-GitlabMilestone {
 
 #https://docs.gitlab.com/ee/api/milestones.html#get-all-issues-assigned-to-a-single-milestone
 function Get-GitlabMilestoneIssues {
+    [CmdletBinding()]
     param(
-        [int] $ProjectId = $GL_ProjectId,
-        [int] $MilestoneId = $GL_MilestoneId,
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $MilestoneId = $script:GitLab.MilestoneId,
         [int] $Page = 1,
         [int] $PerPage = 100,
         [ref] $Count,
@@ -291,8 +350,8 @@ function Get-GitlabMilestoneIssues {
 #https://docs.gitlab.com/ee/api/milestones.html#delete-project-milestone
 function Remove-GitlabMilestone {
     param(
-        [int] $ProjectId = $GL_ProjectId,
-        [int] $MilestoneId = $GL_MilestoneId
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $MilestoneId = $script:GitLab.MilestoneId
     )
 
     $params = @{
@@ -309,6 +368,7 @@ function Remove-GitlabMilestone {
     $all = Get-AllPages -Action "Get-GitlabProjectIssue" @{ Filter = New-GitlabIssueFilter -State closed } -ShowProgress
 #>
 function Get-AllPages {
+    [CmdletBinding()]
     param (
         # Name of the paginator function. Function must support PerPage, Page and Count parameters
         [string] $Action,
@@ -339,6 +399,11 @@ function Get-AllPages {
     } while ($res -and $all_data.Count -lt $count)
     $all_data
 }
+
+function Set-GitLabProjectId([string] $Namespace) {
+    $script:GitLab.ProjectId = Get-GitLabProjectId $Namespace
+}
+
 
 # Get GitLab project Id from the Namespace
 function Get-GitLabProjectId([string] $Namespace) {
@@ -387,4 +452,12 @@ function send-request( [HashTable] $Params ) {
 
     ($p | ConvertTo-Json).Replace('\"', '"').Replace('\r\n', '') | Write-Verbose
     Invoke-RestMethod @p
+}
+
+function Initialize-GitLabSession {
+    param(
+        [string] $Url,
+        [string] $Token
+    )
+    $script:GitLab = @{ Url = $Url; Token = $Token }
 }

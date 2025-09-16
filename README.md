@@ -16,23 +16,27 @@ Nothing particular is required. Works with PowerShell 3+.
 
 ## Functions
 
-|         Function          |                                      Description                                      |
-| ------------------------- | ------------------------------------------------------------------------------------- |
-| Initialize-GitLabSession  | Login to the system by providing URL and token                                        |
-| Get-AllPages              | Paginate over Gitlab response pages                                                   |
-| Get-GitLabProjectId       | Get GitLab project Id from the Namespace. Assign to `$GL_ProjectId` to ommit it later |
-| Get-GitLabIssue           | List project issues or get an issue                                                   |
-| Set-GitLabIssue           | Edit issues title, description, milestone or due date                                 |
-| New-GitLabIssueFilter     | Create issue filter to be used with Get-GitLabIssue                                   |
-| Get-GitLabMilestone       | List project milestone                                                                |
-| Set-GitLabMilestone       | Edit milestone                                                                        |
-| New-GitLabMilestone       | Create a milestone                                                                    |
-| Get-GitLabMilestoneIssues | Get all issues assigned to a single milestone                                         |
-| Remove-GitLabMilestone    | Remove milestone                                                                      |
-| Get-GitLabLabel           | List labels                                                                           |
-| New-GitLabLabel           | Create label                                                                          |
-| Remove-GitLabLabel        | Remove label                                                                          |
-| Send-GitLabFile           | Upload a file to project                                                              |
+|         Function          |                        Description                         |
+| ------------------------- | ---------------------------------------------------------- |
+| Initialize-GitLabSession  | Login to the system by providing URL and token             |
+| Get-AllPages              | Paginate over Gitlab response pages                        |
+| Get-GitLabProjectId       | Get GitLab project Id from the Namespace                   |
+| Set-GitLabProject         | Set GitLab project Id so that you can skip it as parameter |
+| Get-GitLabIssue           | List project issues or get an issue                        |
+| Set-GitLabIssue           | Edit issues title, description, milestone or due date      |
+| New-GitLabIssue           | Create new GitLab issue                                    |
+| New-GitLabIssueNote       | Create new Gitlab issue note                               |
+| New-GitLabIssueFilter     | Create issue filter to be used with Get-GitLabIssue        |
+| Get-GitLabMilestone       | List project milestone                                     |
+| Set-GitLabMilestone       | Edit milestone                                             |
+| Set-GitlabMilestonId      | Set Milestone id so that you can skip it as parameter      |
+| New-GitLabMilestone       | Create a milestone                                         |
+| Get-GitLabMilestoneIssues | Get all issues assigned to a single milestone              |
+| Remove-GitLabMilestone    | Remove milestone                                           |
+| Get-GitLabLabel           | List labels                                                |
+| New-GitLabLabel           | Create label                                               |
+| Remove-GitLabLabel        | Remove label                                               |
+| Send-GitLabFile           | Upload a file to project                                   |
 
 ## Example
 
@@ -41,8 +45,8 @@ import-module mm-gitlab
 
 Initialize-GitlabSession -Url 'https://gitlab.example.com/api/v4' -Token $tokens
 
-# Set project to $GL_ProjectId variable so we don't have to use -Project argument later
-$GL_ProjectId = Get-GitLabProjectId '<group>/<project>'
+# Set working project so -Project argument in other functions can be skipped
+Set-GitLabProjectId '<group>/<project>'
 
 # Get single issue
 $issueId = 1
@@ -56,4 +60,6 @@ $all_issues = Get-AllPages -Action "Get-GitLabIssue" @{ Filter = $f } -ShowProgr
 $file = Send-GitLabFile -FilePath $PSScriptRoot\test.ps1
 $description = $issue.description + "`n" + $file.markdown
 Set-GitlabIssue -IssueId $issueId -Description $issue.description
+
+New-GitlabIssueNote -IssueId $issueId -Body "Powershell test"
 ```

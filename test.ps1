@@ -5,19 +5,23 @@ Import-Module $PSScriptRoot\mm-gitlab.psm1 -Force
 $token = Get-Content $PSScriptRoot\gltoken
 Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token $token
 
-$GL_ProjectId = Get-GitLabProjectId 'jafin-ng/jafin'
+Set-GitLabProjectId 'jafin-ng/jafin'
+#Set-GitLabMilestoneId -Title 'NEXT'
 
+#$issue = New-GitLabIssue -Description "*Test*" -Title "Test Powershell" -Labels "qa","service-rest"
+#$note = New-GitLabIssueNote -IssueId 954 -Body "test"
+#$note
 <#
 # === Issues
     $issueId = 123
     $issue = Get-GitLabIssue -IssueId $issueId
 
-    $f = New-GitLabIssueFilter -Labels 'service-rest', 'meta-trivial'
+    $f = New-GitLabIssueFilter -Labels 'qa', 'priority-hi'
     $f = New-GitLabIssueFilter -Milestone 'NEXT'
-    $f = New-GitLabIssueFilter -Assignee_Username 'mmilic'
-    $f = New-GitLabIssueFilter -Author_Username 'mmilic'
+    $f = New-GitLabIssueFilter -Assignee_Username 'majkinetor'
+    $f = New-GitLabIssueFilter -Author_Username 'majkinetor'
     $f = New-GitLabIssueFilter -Created_After ([datetime]::Now).AddMonths(-1)
-    $f = New-GitLabIssueFilter -Search alat
+    $f = New-GitLabIssueFilter -Search tool
     $all_issues = Get-AllPages -Action "Get-GitLabIssue" @{ Filter = $f } -ShowProgress
     $all_issues.Count
     $all_issues | Format-Table
@@ -25,6 +29,9 @@ $GL_ProjectId = Get-GitLabProjectId 'jafin-ng/jafin'
     $file = Send-GitLabFile -FilePath $PSScriptRoot\test.ps1
     $description = $issue.description + "`n" + $file.markdown
     Set-GitlabIssue -IssueId $issueId -Description $description
+
+    $issue = New-GitLabIssue -Description "*Test*" -Title "Test Powershell" -Labels 'qa','priorty-hi'
+    $note = New-GitLabIssueNote -IssueId $issue.id -Body "test"
 
 # === Milestones
     Get-GitlabMilestone -Iid 1,86 | ft
