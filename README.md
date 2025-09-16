@@ -59,7 +59,8 @@ $all_issues = Get-AllPages -Action "Get-GitLabIssue" @{ Filter = $f } -ShowProgr
 # Upload a file and add it to the issue description
 $file = Send-GitLabFile -FilePath $PSScriptRoot\test.ps1
 $description = $issue.description + "`n" + $file.markdown
-Set-GitlabIssue -IssueId $issueId -Description $issue.description
+Set-GitlabIssue -IssueId $issueId -Description $description
 
+# Create issue note
 New-GitlabIssueNote -IssueId $issueId -Body "Powershell test"
 ```
