@@ -6,6 +6,8 @@ $token = Get-Content $PSScriptRoot\gltoken
 Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token $token
 
 Set-GitLabProjectId 'jafin-ng/jafin'
+$res = Get-GitLabProjectJobs
+$res
 #Set-GitLabMilestoneId -Title 'NEXT'
 
 #$issue = New-GitLabIssue -Description "*Test*" -Title "Test Powershell" -Labels "qa","service-rest"

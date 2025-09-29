@@ -16,27 +16,33 @@ Nothing particular is required. Works with PowerShell 3+.
 
 ## Functions
 
-|         Function          |                        Description                         |
-| ------------------------- | ---------------------------------------------------------- |
-| Initialize-GitLabSession  | Login to the system by providing URL and token             |
-| Get-AllPages              | Paginate over Gitlab response pages                        |
-| Get-GitLabProjectId       | Get GitLab project Id from the Namespace                   |
-| Set-GitLabProject         | Set GitLab project Id so that you can skip it as parameter |
-| Get-GitLabIssue           | List project issues or get an issue                        |
-| Set-GitLabIssue           | Edit issues title, description, milestone or due date      |
-| New-GitLabIssue           | Create new GitLab issue                                    |
-| New-GitLabIssueNote       | Create new Gitlab issue note                               |
-| New-GitLabIssueFilter     | Create issue filter to be used with Get-GitLabIssue        |
-| Get-GitLabMilestone       | List project milestone                                     |
-| Set-GitLabMilestone       | Edit milestone                                             |
-| Set-GitlabMilestonId      | Set Milestone id so that you can skip it as parameter      |
-| New-GitLabMilestone       | Create a milestone                                         |
-| Get-GitLabMilestoneIssues | Get all issues assigned to a single milestone              |
-| Remove-GitLabMilestone    | Remove milestone                                           |
-| Get-GitLabLabel           | List labels                                                |
-| New-GitLabLabel           | Create label                                               |
-| Remove-GitLabLabel        | Remove label                                               |
-| Send-GitLabFile           | Upload a file to project                                   |
+|           Function            |                        Description                         |
+| ----------------------------- | ---------------------------------------------------------- |
+| Initialize-GitLabSession      | Login to the system by providing URL and token             |
+| Get-AllPages                  | Paginate over Gitlab response pages                        |
+| Get-GitLabProjectId           | Get GitLab project Id from the Namespace                   |
+| Set-GitLabProject             | Set GitLab project Id so that you can skip it as parameter |
+| Get-GitLabIssue               | List project issues or get an issue                        |
+| Set-GitLabIssue               | Edit issues title, description, milestone or due date      |
+| New-GitLabIssue               | Create new GitLab issue                                    |
+| New-GitLabIssueNote           | Create new Gitlab issue note                               |
+| New-GitLabIssueFilter         | Create issue filter to be used with Get-GitLabIssue        |
+| Get-GitLabMilestone           | List project milestone                                     |
+| Set-GitLabMilestone           | Edit milestone                                             |
+| Set-GitlabMilestonId          | Set Milestone id so that you can skip it as parameter      |
+| New-GitLabMilestone           | Create a milestone                                         |
+| Get-GitLabMilestoneIssues     | Get all issues assigned to a single milestone              |
+| Remove-GitLabMilestone        | Remove milestone                                           |
+| Get-GitLabLabel               | List labels                                                |
+| New-GitLabLabel               | Create label                                               |
+| Remove-GitLabLabel            | Remove label                                               |
+| Send-GitLabFile               | Upload a file to project                                   |
+| Get-GitLabPipeline            | Get pipeline                                               |
+| Stop-GitLabPipeline           | Cancel pipeline                                            |
+| Remove-GitLabPipeline         | Remove pipeline                                            |
+| Get-GitLabProjectJobs         | Get project jobs                                           |
+| Get-GitLabProjectPipelineJobs | Get project pipeline jobs                                  |
+| Invoke-GitLabProjectJob       | Run, retry, cancel or delete job                           |
 
 ## Example
 

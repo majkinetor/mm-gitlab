@@ -1,4 +1,101 @@
-# v0.5
+# v0.6
+
+# https://docs.gitlab.com/api/jobs/#run-a-job
+function Invoke-GitLabProjectJob {
+        param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $JobId,
+        [ValidateSet('run', 'retry', 'cancel', 'erase')]
+        [string] $Action
+    )
+
+    $params = @{
+        Method = "Post"
+        Endpoint = "projects/$ProjectId/jobs/$JobId/$Action"
+    }
+    Send-Request $params
+}
+
+# https://docs.gitlab.com/api/jobs/#list-pipeline-jobs
+function Get-GitLabProjectPipelineJobs {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $PipelineId
+    )
+
+    $params = @{
+        Method = "Get"
+        Endpoint = "projects/$ProjectId/pipelines/$PipelineId/jobs"
+    }
+    Send-Request $params
+}
+
+# https://docs.gitlab.com/api/jobs/#list-project-jobs
+function Get-GitLabProjectJobs {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId
+    )
+
+    $params = @{
+        Method = "Get"
+        Endpoint = "projects/$ProjectId/jobs"
+    }
+    Send-Request $params
+}
+
+# https://docs.gitlab.com/api/pipelines/#list-project-pipelines
+# Use 'latest' as id for latest pipeline
+function Get-GitLabPipeline {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $Id,
+        [string] $Name,
+        [string] $Status,
+        [string] $Username,
+        [string] $Source
+    )
+
+    $query = ""
+    $query += if ($Name) { "&name=" +  [uri]::EscapeDataString( $Name ) }
+    $query += if ($Status) { "&status=$Status" }
+    $query += if ($Username) { "&username=$Username" }
+    $query += if ($Source) { "&source=$Source" }
+    $query = if ($query) { $query.Substring(1) }
+
+    $params = @{
+        Method = "Get"
+        Endpoint = $Id ? "projects/$ProjectId/pipelines/$Id" : "projects/$ProjectId/pipelines?$query"
+    }
+    Send-Request $params
+}
+
+# https://docs.gitlab.com/api/pipelines/#cancel-all-jobs-for-a-pipeline
+function Stop-GitLabPipeline {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $Id
+    )
+
+    $params = @{
+        Method = "Post"
+        Endpoint = "projects/$ProjectId/pipelines/$Id/cancel"
+    }
+    Send-Request $params
+}
+
+# https://docs.gitlab.com/api/pipelines/#delete-a-pipeline
+function Remove-GitLabPipeline {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $Id
+    )
+
+    $params = @{
+        Method = "Delete"
+        Endpoint = "projects/$ProjectId/pipelines/$Id"
+    }
+    Send-Request $params
+}
 
 # https://docs.gitlab.com/api/notes/#create-new-issue-note
 function New-GitLabIssueNote {
