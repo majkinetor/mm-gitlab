@@ -16,6 +16,20 @@ function Invoke-GitLabProjectJob {
     Send-Request $params
 }
 
+# https://docs.gitlab.com/api/jobs/#list-pipeline-trigger-jobs
+function Get-GitLabProjectPipelineBridges {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [int] $PipelineId
+    )
+
+    $params = @{
+        Method = "Get"
+        Endpoint = "projects/$ProjectId/pipelines/$PipelineId/bridges"
+    }
+    Send-Request $params
+}
+
 # https://docs.gitlab.com/api/jobs/#list-pipeline-jobs
 function Get-GitLabProjectPipelineJobs {
     param(
