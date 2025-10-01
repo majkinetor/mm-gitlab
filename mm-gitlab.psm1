@@ -83,6 +83,20 @@ function Get-GitLabPipeline {
     Send-Request $params
 }
 
+# https://docs.gitlab.com/api/pipelines/#create-a-new-pipeline
+function New-GitLabPipeline {
+    param(
+        [int] $ProjectId = $script:GitLab.ProjectId,
+        [string] $Ref
+    )
+
+    $params = @{
+        Method = "Post"
+        Endpoint = "projects/$ProjectId/pipeline?ref=$ref"
+    }
+    Send-Request $params
+}
+
 # https://docs.gitlab.com/api/pipelines/#cancel-all-jobs-for-a-pipeline
 function Stop-GitLabPipeline {
     param(

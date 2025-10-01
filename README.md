@@ -38,6 +38,7 @@ Nothing particular is required. Works with PowerShell 3+.
 | Remove-GitLabLabel               | Remove label                                               |
 | Send-GitLabFile                  | Upload a file to project                                   |
 | Get-GitLabPipeline               | Get pipeline                                               |
+| New-GitLabPipeline               | New pipeline                                               |
 | Stop-GitLabPipeline              | Cancel pipeline                                            |
 | Remove-GitLabPipeline            | Remove pipeline                                            |
 | Get-GitLabProjectJobs            | Get project jobs                                           |

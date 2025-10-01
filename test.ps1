@@ -6,7 +6,7 @@ $token = Get-Content $PSScriptRoot\gltoken
 Initialize-GitlabSession -Url 'https://gitlab.nil.rs/api/v4' -Token $token
 
 Set-GitLabProjectId 'jafin-ng/jafin'
-$res = Get-GitLabProjectJobs
+$res = New-GitlabPipeline -Ref master
 $res
 #Set-GitLabMilestoneId -Title 'NEXT'
 
