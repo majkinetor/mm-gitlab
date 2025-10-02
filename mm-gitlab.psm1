@@ -87,12 +87,15 @@ function Get-GitLabPipeline {
 function New-GitLabPipeline {
     param(
         [int] $ProjectId = $script:GitLab.ProjectId,
-        [string] $Ref
+        [string] $Ref,
+        [HashTable[]] $Variables,
+        [HashTable[]] $Inputs
     )
 
     $params = @{
         Method = "Post"
         Endpoint = "projects/$ProjectId/pipeline?ref=$ref"
+        Body = @{ inputs = $Inputs; variables = $Variables } | ConvertTo-Json -Depth 3
     }
     Send-Request $params
 }
