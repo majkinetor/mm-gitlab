@@ -72,4 +72,7 @@ Set-GitlabIssue -IssueId $issueId -Description $description
 
 # Create issue note
 New-GitlabIssueNote -IssueId $issueId -Body "Powershell test"
+
+# Run a pipeline
+$pipeline = New-GitlabPipeline -Ref master
 ```
