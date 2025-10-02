@@ -12,7 +12,7 @@ Use `$VerbosePreference = 'Continue'` on the top of the script or `-Verbose` opt
 
 ## Prerequisites
 
-Nothing particular is required. Works with PowerShell 3+.
+Nothing particular is required. Works with PowerShell 6+.
 
 ## Functions
 
